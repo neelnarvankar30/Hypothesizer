@@ -1,6 +1,6 @@
 /*global chrome*/
 
-
+import ReactDOM from 'react-dom';
 import React, { useRef, useState, useCallback } from 'react';
 import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner';
@@ -14,8 +14,11 @@ import './App.css';
 import { startProfiler, endProfiler } from '../../api/devtools';
 import { getRelevantAndRankedHypotheses, getKeywords } from "../../api/hypothesizer";
 import ReactHtmlParser from 'react-html-parser';
+import { Visibility } from '@material-ui/icons';
 
-var xss = require("xss");
+// var xss = require("xss");
+var parse = require('html-react-parser');
+// var i = 0;
 
 function App() {
   type hypothesizerState = "idle" | "recording" | "analyzing";
@@ -82,6 +85,10 @@ function App() {
     }
   }
 
+  var itemToRnd= new Array();
+  var entryToRnd = new Array();
+  // var a = <div>
+  // var a = document.createElement('DIV'>)
   return (
     <div className="App">
       <div className="App-header">
@@ -119,8 +126,9 @@ function App() {
             {hypothesizerState === "idle" && (results?.length! > 0) && 
               <div> 
                 <ListGroup>
+                <div style = {{visibility: 'hidden'}}>  {results!.map(entry => entryToRnd.push(entry.hypothesis))}</div>
                   {results!.map(entry => <ListGroup.Item> {ReactHtmlParser("<strong>Hypothesis</strong>: " + 
-                xss(entry.hypothesis) + "<br></br> <strong>Confidence: </strong>" + entry.confidence)}
+                entryToRnd + "<br></br> <strong>Confidence: </strong>" + entry.confidence)}
                 <br/>
                 <Button onClick={() => removeHypothesis(entry)}variant="outline-danger" size="sm" block> Remove </Button> </ListGroup.Item>)} 
                 </ListGroup>
@@ -135,14 +143,20 @@ function App() {
             }
             <br></br>
             <strong style={{fontSize: 20}}> Execution Trace </strong>
+            {/* {trace}) */}
+            {/* {ReactDOM.render(itemToRnd, document.getElementById('tracetest'))} */}
             {hypothesizerState === "analyzing" && <div className="center"> <br></br> <Spinner animation="border" /> </div>}
             {hypothesizerState === "idle" && 
               <div>
                 <ListGroup>
-                  {trace!.map(text => <ListGroup.Item dangerouslySetInnerHTML={{__html: xss(text)}}></ListGroup.Item>)}
+                  {/* {itemToRnd.push('<div>')} */}
+                  <div style = {{visibility: 'hidden'}}>{trace!.map(text=> itemToRnd.push(text)) } </div> 
+                  {/* {itemToRnd.push('</div>')} */}
+                  <div>{trace!.map(text => <ListGroup.Item>{parse("<div>"+itemToRnd[0]+"</div>")}</ListGroup.Item>)}</div>
                 </ListGroup>
-              </div>
-            }  
+                </div>
+            }
+            {/* {itemToRnd}   */}
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowModal(false)}>Close</Button>
